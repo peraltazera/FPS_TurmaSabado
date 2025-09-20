@@ -14,6 +14,12 @@ public class Player : MonoBehaviour
 
     Vector3 aceleracao;
 
+    public Arma arma;
+    public float timer = 1f;
+    public bool atirou = false;
+
+    public Hud hud;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -21,6 +27,38 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            atirou = true;
+            timer = 0.1f;
+            arma.Atirar();
+            Vector3 origem = transform.position;
+            Vector3 direcao = transform.forward;
+            Ray ray = new Ray(origem, direcao);
+            RaycastHit informacao;
+            bool hit = Physics.Raycast(ray, out informacao);
+
+            if (informacao.collider.CompareTag("Inimigo"))
+            {
+                Inimigo inimigo = informacao.collider.GetComponent<Inimigo>();
+                inimigo.Destroy_Respawn();
+                hud.GanharPontos();
+                //pontosTimer.AumentarPontuacao();
+            }
+
+            print(hit);
+        }
+
+        if (atirou)
+        {
+            timer -= Time.deltaTime;
+            if (timer < 0)
+            {
+                arma.PararDeAtirar();
+                atirou = false;
+            }
+        }
+
         float mouseX = Input.GetAxis("Mouse X") * sensibilidadeMouse * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * sensibilidadeMouse * Time.deltaTime;
 
